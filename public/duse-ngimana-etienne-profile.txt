@@ -1,0 +1,29 @@
+DUSE NGIMANA ETIENNE
+Creative Developer | Rwanda
+
+PROFILE
+Passionate software developer focused on transforming complex problems into simple, beautiful, and intuitive digital experiences. Combines creativity, clean code, and modern technology to build useful products.
+
+EDUCATION
+Level 5 Software Development
+Collegio Sant'Antonio Maria Zaccaria
+
+SKILLS
+React.js, JavaScript, TypeScript, HTML5, CSS3, Tailwind CSS, Node.js, Git & GitHub, Figma, REST APIs
+
+SERVICES
+- Web development
+- UI / UX design
+- Responsive design
+- Backend development
+
+SELECTED PROJECTS
+- E-Commerce Platform: React, Node.js, MongoDB
+- Finance Dashboard: React, Tailwind, Chart.js
+- Creative Agency: React, Framer Motion, CSS
+
+CONTACT
+Email: dusengimanaetienne9@gmail.com
+Phone: +250 798 220 175
+WhatsApp: +250 738 304 780
+GitHub: https://github.com/Etienne120/Etienne

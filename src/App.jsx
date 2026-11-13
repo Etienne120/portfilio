@@ -6,6 +6,7 @@ import {
   CodeXml,
   Mail,
   ArrowUpRight,
+  Download,
   Code2,
   Palette,
   Rocket,
@@ -59,6 +60,13 @@ const projects = [
   },
 ];
 
+const projectCategories = [
+  { label: "All", value: "All" },
+  { label: "Full Stack", value: "Full Stack Development" },
+  { label: "Frontend", value: "Frontend Development" },
+  { label: "UI / UX", value: "UI / UX Design" },
+];
+
 const skills = [
   "React.js",
   "JavaScript",
@@ -106,8 +114,31 @@ const services = [
 function App() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [wordIndex, setWordIndex] = useState(0);
+  const [projectCategory, setProjectCategory] = useState("All");
 
   const closeMenu = () => setMenuOpen(false);
+  const visibleProjects = projects.filter(
+    (project) =>
+      projectCategory === "All" || project.category === projectCategory
+  );
+
+  const handleMessageSubmit = (event) => {
+    event.preventDefault();
+
+    const formData = new FormData(event.currentTarget);
+    const name = formData.get("name");
+    const senderEmail = formData.get("email");
+    const message = formData.get("message");
+    const body = `Name: ${name}\nEmail: ${senderEmail}\n\n${message}`;
+    const channel = event.nativeEvent.submitter.value;
+
+    if (channel === "whatsapp") {
+      window.open(`${whatsappUrl}?text=${encodeURIComponent(body)}`, "_blank", "noopener,noreferrer");
+      return;
+    }
+
+    window.location.href = `mailto:${emailAddress}?subject=${encodeURIComponent(`Portfolio message from ${name}`)}&body=${encodeURIComponent(body)}`;
+  };
 
   useEffect(() => {
     const intervalId = window.setInterval(() => {
@@ -251,6 +282,14 @@ function App() {
               <a href="#contact" className="secondary-button">
                 Get In Touch
               </a>
+
+              <a
+                href="/duse-ngimana-etienne-profile.txt"
+                download
+                className="secondary-button"
+              >
+                Download Profile <Download size={17} />
+              </a>
             </div>
 
             <div className="social-links">
@@ -294,10 +333,10 @@ function App() {
               </div>
 
               <div className="profile-avatar">
-                <img src={portrait} alt="Duse Ngimana Etienne" />
+                <img src={portrait} alt="DUSENGIMANA Etienne" />
               </div>
 
-              <h2>Duse Ngimana Etienne</h2>
+              <h2>DUSENGIMANA Etienne</h2>
               <p>Turning ideas into digital reality.</p>
 
               <div className="profile-bottom">
@@ -451,11 +490,26 @@ function App() {
             </a>
           </div>
 
+          <div className="project-filters" role="group" aria-label="Filter projects">
+            {projectCategories.map((category) => (
+              <button
+                key={category.value}
+                type="button"
+                aria-pressed={projectCategory === category.value}
+                className={projectCategory === category.value ? "active" : ""}
+                onClick={() => setProjectCategory(category.value)}
+              >
+                {category.label}
+              </button>
+            ))}
+          </div>
+
           <div className="projects-grid">
-            {projects.map((project) => (
+            {visibleProjects.map((project) => (
               <motion.article
                 className={`project-card ${project.color}`}
                 key={project.number}
+                layout
                 whileHover={{ y: -8 }}
                 transition={{ duration: 0.3 }}
               >
@@ -522,12 +576,36 @@ function App() {
                 your vision.
               </p>
 
-              <a
-                href={`mailto:${emailAddress}`}
-                className="primary-button"
-              >
-                Say Hello <ArrowUpRight size={18} />
-              </a>
+              <form className="message-form" onSubmit={handleMessageSubmit}>
+                <label>
+                  Your name
+                  <input name="name" type="text" autoComplete="name" required />
+                </label>
+
+                <label>
+                  Your email
+                  <input
+                    name="email"
+                    type="email"
+                    autoComplete="email"
+                    required
+                  />
+                </label>
+
+                <label>
+                  Message
+                  <textarea name="message" rows="4" required />
+                </label>
+
+                <div className="message-form-actions">
+                  <button className="primary-button" type="submit" name="channel" value="email">
+                    Send Email <Mail size={17} />
+                  </button>
+                  <button className="secondary-button" type="submit" name="channel" value="whatsapp">
+                    Send WhatsApp <MessageCircle size={17} />
+                  </button>
+                </div>
+              </form>
             </div>
 
             <div className="contact-details">

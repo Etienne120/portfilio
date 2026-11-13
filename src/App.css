@@ -375,7 +375,7 @@ button {
 }
 
 .profile-avatar {
-  height: 360px;
+  height: 220px;
   margin: 25px 0;
   border-radius: 15px;
   overflow: hidden;
@@ -386,7 +386,7 @@ button {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: center 35%;
+  object-position: center 15%;
   transition: transform 0.6s ease;
 }
 
@@ -672,11 +672,47 @@ button {
   gap: 20px;
 }
 
+.project-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  width: fit-content;
+  max-width: 100%;
+  margin-top: 8px;
+  padding: 5px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.project-filters button {
+  border: 0;
+  border-radius: 5px;
+  padding: 9px 13px;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+  transition: color 0.2s, background 0.2s;
+}
+
+.project-filters button:hover,
+.project-filters button.active {
+  background: rgba(168, 85, 247, 0.14);
+  color: var(--text);
+}
+
+.project-filters button:focus-visible {
+  outline: 2px solid #c084fc;
+  outline-offset: 2px;
+}
+
 .projects-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 22px;
-  margin-top: 30px;
+  margin-top: 22px;
 }
 
 .project-card {
@@ -825,6 +861,62 @@ button {
   line-height: 1.9;
   margin-bottom: 30px;
   max-width: 450px;
+}
+
+.message-form {
+  display: grid;
+  gap: 16px;
+  max-width: 560px;
+}
+
+.message-form label {
+  display: grid;
+  gap: 8px;
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.message-form input,
+.message-form textarea {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  padding: 12px 14px;
+  background: rgba(8, 8, 16, 0.72);
+  color: var(--text);
+  font: inherit;
+  font-weight: 400;
+}
+
+.message-form textarea {
+  min-height: 120px;
+  resize: vertical;
+}
+
+.message-form input:focus-visible,
+.message-form textarea:focus-visible {
+  outline: 2px solid #c084fc;
+  outline-offset: 2px;
+}
+
+.message-form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 4px;
+}
+
+.message-form-actions button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  cursor: pointer;
+}
+
+.message-form-actions .primary-button {
+  border: 0;
 }
 
 .contact-details {
