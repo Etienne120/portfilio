@@ -284,11 +284,11 @@ function App() {
               </a>
 
               <a
-                href="/duse-ngimana-etienne-profile.txt"
+                href="/duse-ngimana-etienne-profile.pdf"
                 download
                 className="secondary-button"
               >
-                Download Profile <Download size={17} />
+                Download PDF Profile <Download size={17} />
               </a>
             </div>
 
