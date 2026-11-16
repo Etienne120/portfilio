@@ -1,6 +1,12 @@
 
 import { useEffect, useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import {
+  AnimatePresence,
+  motion,
+  useReducedMotion,
+  useScroll,
+  useSpring,
+} from "framer-motion";
 import portrait from "../eti.jpg";
 import {
   CodeXml,
@@ -24,39 +30,41 @@ const githubUrl = "https://github.com/Etienne120/Etienne";
 const emailAddress = "dusengimanaetienne9@gmail.com";
 const phoneNumber = "+250798220175";
 const whatsappUrl = "https://wa.me/250738304780";
-const headlineWords = ["inspire.", "connect.", "matter."];
-const purposeWords = ["To", "develop", "quality", "software", "is", "my", "purpose"];
-
+const focusPhrases = [
+  "responsive interfaces",
+  "useful web applications",
+  "maintainable code",
+];
 const projects = [
   {
     number: "01",
     title: "E-Commerce Platform",
     category: "Full Stack Development",
     description:
-      "A modern shopping experience with beautiful UI, secure checkout and responsive design.",
+      "A full-stack e-commerce project built with React, Node.js and MongoDB.",
     tech: ["React", "Node.js", "MongoDB"],
     color: "purple",
-    link: "https://github.com/",
+    link: githubUrl,
   },
   {
     number: "02",
     title: "Finance Dashboard",
     category: "Frontend Development",
     description:
-      "A powerful analytics dashboard with interactive charts and real-time insights.",
+      "A finance dashboard project built with React, Tailwind CSS and Chart.js.",
     tech: ["React", "Tailwind", "Chart.js"],
     color: "blue",
-    link: "https://github.com/",
+    link: githubUrl,
   },
   {
     number: "03",
     title: "Creative Agency",
     category: "UI / UX Design",
     description:
-      "A visually engaging agency website with fluid animations and elegant typography.",
+      "A creative agency website built with React, Framer Motion and CSS.",
     tech: ["React", "Framer Motion", "CSS"],
     color: "pink",
-    link: "https://github.com/",
+    link: githubUrl,
   },
 ];
 
@@ -113,14 +121,40 @@ const services = [
 
 function App() {
   const [menuOpen, setMenuOpen] = useState(false);
-  const [wordIndex, setWordIndex] = useState(0);
   const [projectCategory, setProjectCategory] = useState("All");
+  const [messageStatus, setMessageStatus] = useState("");
+  const [focusIndex, setFocusIndex] = useState(0);
+  const shouldReduceMotion = useReducedMotion();
+  const { scrollYProgress } = useScroll();
+  const scrollProgress = useSpring(scrollYProgress, {
+    stiffness: 100,
+    damping: 30,
+    restDelta: 0.001,
+  });
+  const revealProps = shouldReduceMotion
+    ? {}
+    : {
+        initial: { opacity: 0, y: 24 },
+        whileInView: { opacity: 1, y: 0 },
+        viewport: { once: true, amount: 0.15 },
+        transition: { duration: 0.65, ease: [0.22, 1, 0.36, 1] },
+      };
 
   const closeMenu = () => setMenuOpen(false);
   const visibleProjects = projects.filter(
     (project) =>
       projectCategory === "All" || project.category === projectCategory
   );
+
+  useEffect(() => {
+    if (shouldReduceMotion) return undefined;
+
+    const intervalId = window.setInterval(() => {
+      setFocusIndex((index) => (index + 1) % focusPhrases.length);
+    }, 3200);
+
+    return () => window.clearInterval(intervalId);
+  }, [shouldReduceMotion]);
 
   const handleMessageSubmit = (event) => {
     event.preventDefault();
@@ -133,30 +167,35 @@ function App() {
     const channel = event.nativeEvent.submitter.value;
 
     if (channel === "whatsapp") {
+      setMessageStatus(
+        "WhatsApp is opening with your message. Review and send it there."
+      );
       window.open(`${whatsappUrl}?text=${encodeURIComponent(body)}`, "_blank", "noopener,noreferrer");
       return;
     }
 
+    setMessageStatus(
+      `Your email app should open with a draft addressed to ${emailAddress}. Review and send it there; this website cannot confirm delivery.`
+    );
     window.location.href = `mailto:${emailAddress}?subject=${encodeURIComponent(`Portfolio message from ${name}`)}&body=${encodeURIComponent(body)}`;
   };
 
-  useEffect(() => {
-    const intervalId = window.setInterval(() => {
-      setWordIndex((currentIndex) => (currentIndex + 1) % headlineWords.length);
-    }, 2400);
-
-    return () => window.clearInterval(intervalId);
-  }, []);
-
   return (
     <div className="portfolio">
+      {!shouldReduceMotion && (
+        <motion.div
+          className="scroll-progress"
+          style={{ scaleX: scrollProgress }}
+          aria-hidden="true"
+        />
+      )}
       <div className="glow glow-one"></div>
       <div className="glow glow-two"></div>
 
       {/* NAVIGATION */}
       <nav className="navbar">
         <a href="#home" className="logo" onClick={closeMenu}>
-          dev<span>.</span>
+          ETIENNE<span>.</span>
         </a>
 
         <button
@@ -192,95 +231,81 @@ function App() {
         <section className="hero section" id="home">
           <motion.div
             className="hero-content"
-            initial={{ opacity: 0, y: 40 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
+            initial={shouldReduceMotion ? false : { opacity: 0, y: 28 }}
+            animate={shouldReduceMotion ? undefined : { opacity: 1, y: 0 }}
+            transition={shouldReduceMotion ? undefined : { duration: 0.75 }}
           >
             <div className="availability">
               <span className="status-dot"></span>
-              Available for opportunities
+              Open to opportunities
             </div>
 
-            <p className="eyebrow">HELLO, I'M DUSE NGIMANA ETIENNE</p>
+            <p className="eyebrow">SOFTWARE DEVELOPER · RWANDA</p>
 
             <h1>
-              Building digital
+              Thoughtful software.
               <br />
-              experiences that
-              <br />
-              <span className="animated-word">
-                <AnimatePresence mode="wait" initial={false}>
-                  <motion.span
-                    key={headlineWords[wordIndex]}
-                    className="gradient-text"
-                    initial={{ opacity: 0, y: 22, filter: "blur(6px)" }}
-                    animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-                    exit={{ opacity: 0, y: -18, filter: "blur(6px)" }}
-                    transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-                  >
-                    {headlineWords[wordIndex]}
-                  </motion.span>
-                </AnimatePresence>
-              </span>
+              <span className="gradient-text">Real-world impact.</span>
             </h1>
 
-            <p className="hero-description">
-              I'm a creative developer passionate about building
-              beautiful, functional and meaningful digital experiences
-              that solve real-world problems.
-            </p>
-
-            <motion.div
-              className="purpose-code"
-              initial={{ opacity: 0, y: 14 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.45, duration: 0.5 }}
-              aria-label="To develop quality software is my purpose"
+            <div
+              className="hero-terminal"
+              role="group"
+              aria-label="Areas of focus: responsive interfaces, useful web applications, and maintainable code"
             >
-              <div className="purpose-code-header" aria-hidden="true">
-                <span className="code-window-dots">
+              <div className="terminal-header" aria-hidden="true">
+                <span className="terminal-dots">
                   <i></i>
                   <i></i>
                   <i></i>
                 </span>
-                <span>purpose.js</span>
+                <span>focus.ts</span>
+                <span className="terminal-running">
+                  <i></i> LIVE
+                </span>
               </div>
-
-              <p className="purpose-code-line" aria-hidden="true">
-                <span className="code-keyword">const</span>
-                <span className="code-variable">purpose</span>
-                <span className="code-operator">=</span>
-                <span className="code-string">&quot;</span>
-                {purposeWords.map((word, index) => (
-                  <motion.span
-                    className={`purpose-word ${
-                      index < purposeWords.length - 1 ? "purpose-word-spaced" : ""
-                    }`}
-                    key={word}
-                    initial={{ opacity: 0, y: 8 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.8 + index * 0.12, duration: 0.3 }}
-                  >
-                    {word}
-                  </motion.span>
-                ))}
-                <span className="code-string">&quot;</span>
-                <span className="code-punctuation">;</span>
-                <motion.span
-                  className="code-cursor"
-                  animate={{ opacity: [0, 1, 0] }}
-                  transition={{ duration: 1.1, repeat: Infinity }}
-                />
+              <p className="terminal-line" aria-hidden="true">
+                <span className="terminal-keyword">const</span>
+                <span className="terminal-variable">focus</span>
+                <span className="terminal-operator">=</span>
+                <span className="terminal-quote">&quot;</span>
+                <span className="terminal-word-window">
+                  <AnimatePresence mode="wait" initial={false}>
+                    <motion.span
+                      className="terminal-word"
+                      key={focusPhrases[focusIndex]}
+                      initial={
+                        shouldReduceMotion ? false : { opacity: 0, y: 7 }
+                      }
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={shouldReduceMotion ? undefined : { opacity: 0, y: -7 }}
+                      transition={{ duration: 0.3 }}
+                    >
+                      {focusPhrases[focusIndex]}
+                    </motion.span>
+                  </AnimatePresence>
+                </span>
+                <span className="terminal-quote">&quot;</span>
+                <span className="terminal-operator">;</span>
+                {!shouldReduceMotion && (
+                  <span className="terminal-cursor" aria-hidden="true"></span>
+                )}
               </p>
-            </motion.div>
+            </div>
+
+            <p className="hero-description">
+              I build clear, responsive web experiences with modern
+              frontend and backend technologies — turning practical
+              ideas into useful digital products.
+            </p>
 
             <div className="hero-actions">
               <a href="#projects" className="primary-button">
-                Explore My Work <ArrowUpRight size={18} />
+                View selected work <ArrowUpRight size={18} />
               </a>
 
               <a href="#contact" className="secondary-button">
-                Get In Touch
+                Get in touch
               </a>
 
               <a
@@ -288,7 +313,7 @@ function App() {
                 download
                 className="secondary-button"
               >
-                Download PDF Profile <Download size={17} />
+                Download profile <Download size={17} />
               </a>
             </div>
 
@@ -319,16 +344,16 @@ function App() {
 
           <motion.div
             className="hero-visual"
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 1 }}
+            initial={shouldReduceMotion ? false : { opacity: 0, scale: 0.96 }}
+            animate={shouldReduceMotion ? undefined : { opacity: 1, scale: 1 }}
+            transition={shouldReduceMotion ? undefined : { duration: 0.9, delay: 0.12 }}
           >
             <div className="orbit orbit-one"></div>
             <div className="orbit orbit-two"></div>
 
             <div className="profile-card">
               <div className="profile-top">
-                <span>CREATIVE DEVELOPER</span>
+                <span>SOFTWARE DEVELOPER</span>
                 <span className="profile-dot">✦</span>
               </div>
 
@@ -336,92 +361,71 @@ function App() {
                 <img src={portrait} alt="DUSENGIMANA Etienne" />
               </div>
 
-              <h2>DUSENGIMANA Etienne</h2>
-              <p>Turning ideas into digital reality.</p>
+              <h2>Duse Ngimana Etienne</h2>
+              <p>Software Development · Kigali, Rwanda</p>
 
               <div className="profile-bottom">
                 <span>BASED IN RWANDA</span>
-                <span>2026 ©</span>
+                <span>AVAILABLE WORLDWIDE</span>
               </div>
             </div>
 
             <div className="floating-tag tag-one">
-              <Code2 size={17} /> Clean Code
+              <Code2 size={17} /> React &amp; JavaScript
             </div>
 
             <div className="floating-tag tag-two">
-              <Rocket size={17} /> Creative Ideas
+              <Rocket size={17} /> Full-stack projects
             </div>
           </motion.div>
         </section>
 
         {/* ABOUT */}
-        <section className="section about" id="about">
+        <motion.section className="section about" id="about" {...revealProps}>
           <p className="eyebrow">01 / ABOUT ME</p>
 
           <div className="about-grid">
             <h2 className="section-heading">
-              Passion meets
-              <span className="gradient-text"> technology.</span>
+              Practical thinking.
+              <span className="gradient-text"> Thoughtful execution.</span>
             </h2>
 
             <div className="about-content">
               <p>
-                I'm a passionate software developer who loves
-                transforming complex problems into simple, beautiful
-                and intuitive experiences.
+                I’m a software developer focused on building web
+                applications that are clear, useful and comfortable to
+                use across devices.
               </p>
 
               <p>
-                My approach combines creativity, clean code and modern
-                technology to build products that people genuinely
-                enjoy using.
+                I work across frontend development, interface design and
+                backend fundamentals, with a focus on maintainable code
+                and considered details.
               </p>
 
               <div className="education-note">
                 <GraduationCap size={22} aria-hidden="true" />
                 <div>
-                  <span className="education-label">CURRENT STUDIES</span>
+                  <span className="education-label">EDUCATION</span>
                   <h3>Level 5 Software Development</h3>
                   <p>Collegio Sant'Antonio Maria Zaccaria</p>
                 </div>
               </div>
 
               <a href="#contact" className="text-link">
-                More about me <ArrowUpRight size={18} />
+                Start a conversation <ArrowUpRight size={18} />
               </a>
             </div>
           </div>
 
-          <div className="stats-grid">
-            <div className="stat">
-              <h3>03+</h3>
-              <p>Years Learning</p>
-            </div>
-
-            <div className="stat">
-              <h3>15+</h3>
-              <p>Projects Built</p>
-            </div>
-
-            <div className="stat">
-              <h3>10+</h3>
-              <p>Technologies</p>
-            </div>
-
-            <div className="stat">
-              <h3>100%</h3>
-              <p>Passion</p>
-            </div>
-          </div>
-        </section>
+        </motion.section>
 
         {/* SKILLS */}
-        <section className="section skills" id="skills">
+        <motion.section className="section skills" id="skills" {...revealProps}>
           <p className="eyebrow">02 / MY EXPERTISE</p>
 
           <h2 className="section-heading">
-            Technologies I <span className="gradient-text">love.</span>
+            A practical, modern <span className="gradient-text">toolkit.</span>
           </h2>
 
           <div className="skills-grid">
@@ -429,8 +433,11 @@ function App() {
               <motion.div
                 className="skill-card"
                 key={skill}
-                whileHover={{ y: -7, scale: 1.03 }}
-                transition={{ duration: 0.2 }}
+                initial={shouldReduceMotion ? false : { opacity: 0, y: 16 }}
+                whileInView={shouldReduceMotion ? undefined : { opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.4 }}
+                whileHover={shouldReduceMotion ? undefined : { y: -4 }}
+                transition={{ duration: 0.35, delay: shouldReduceMotion ? 0 : index * 0.035 }}
               >
                 <span>{String(index + 1).padStart(2, "0")}</span>
                 <h3>{skill}</h3>
@@ -438,15 +445,14 @@ function App() {
               </motion.div>
             ))}
           </div>
-        </section>
+        </motion.section>
 
         {/* SERVICES */}
-        <section className="section services" id="services">
+        <motion.section className="section services" id="services" {...revealProps}>
           <p className="eyebrow">03 / WHAT I DO</p>
 
           <h2 className="section-heading">
-            Turning ideas into{" "}
-            <span className="gradient-text">reality.</span>
+            How I can <span className="gradient-text">contribute.</span>
           </h2>
 
           <div className="services-grid">
@@ -454,8 +460,14 @@ function App() {
               <motion.div
                 className="service-card"
                 key={service.number}
-                whileHover={{ y: -8 }}
-                transition={{ duration: 0.3 }}
+                initial={shouldReduceMotion ? false : { opacity: 0, y: 20 }}
+                whileInView={shouldReduceMotion ? undefined : { opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.25 }}
+                whileHover={shouldReduceMotion ? undefined : { y: -5 }}
+                transition={{
+                  duration: 0.4,
+                  delay: shouldReduceMotion ? 0 : Number(service.number) * 0.06,
+                }}
               >
                 <div className="service-top">
                   <div className="service-icon">{service.icon}</div>
@@ -469,15 +481,15 @@ function App() {
               </motion.div>
             ))}
           </div>
-        </section>
+        </motion.section>
 
         {/* PROJECTS */}
-        <section className="section projects" id="projects">
+        <motion.section className="section projects" id="projects" {...revealProps}>
           <p className="eyebrow">04 / SELECTED WORK</p>
 
           <div className="projects-heading">
             <h2 className="section-heading">
-              Things I've <span className="gradient-text">built.</span>
+              Selected <span className="gradient-text">projects.</span>
             </h2>
 
             <a
@@ -505,13 +517,20 @@ function App() {
           </div>
 
           <div className="projects-grid">
-            {visibleProjects.map((project) => (
+            <AnimatePresence mode="popLayout">
+              {visibleProjects.map((project, index) => (
               <motion.article
                 className={`project-card ${project.color}`}
                 key={project.number}
-                layout
-                whileHover={{ y: -8 }}
-                transition={{ duration: 0.3 }}
+                layout={!shouldReduceMotion}
+                initial={shouldReduceMotion ? false : { opacity: 0, y: 18 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={shouldReduceMotion ? undefined : { opacity: 0, y: -10 }}
+                whileHover={shouldReduceMotion ? undefined : { y: -5 }}
+                transition={{
+                  duration: 0.35,
+                  delay: shouldReduceMotion ? 0 : index * 0.07,
+                }}
               >
                 <div className="project-preview">
                   <div className="preview-window">
@@ -549,16 +568,17 @@ function App() {
                     rel="noreferrer"
                     className="project-link"
                   >
-                    View Project <ArrowUpRight size={18} />
+                    View GitHub profile <ArrowUpRight size={18} />
                   </a>
                 </div>
               </motion.article>
-            ))}
+              ))}
+            </AnimatePresence>
           </div>
-        </section>
+        </motion.section>
 
         {/* CONTACT */}
-        <section className="section contact" id="contact">
+        <motion.section className="section contact" id="contact" {...revealProps}>
           <p className="eyebrow">05 / GET IN TOUCH</p>
 
           <div className="contact-container">
@@ -571,9 +591,8 @@ function App() {
               </h2>
 
               <p>
-                I'm always open to discussing new projects,
-                creative ideas and opportunities to be part of
-                your vision.
+                For project enquiries, collaboration or opportunities,
+                send a short note and I’ll get back to you.
               </p>
 
               <form className="message-form" onSubmit={handleMessageSubmit}>
@@ -605,6 +624,11 @@ function App() {
                     Send WhatsApp <MessageCircle size={17} />
                   </button>
                 </div>
+                {messageStatus && (
+                  <p className="form-feedback" role="status" aria-live="polite">
+                    {messageStatus}
+                  </p>
+                )}
               </form>
             </div>
 
@@ -644,16 +668,16 @@ function App() {
               </a>
             </div>
           </div>
-        </section>
+        </motion.section>
       </main>
 
       {/* FOOTER */}
       <footer className="footer">
         <a href="#home" className="logo">
-          dev<span>.</span>
+          ETIENNE<span>.</span>
         </a>
 
-        <p>Designed & Built with passion in Rwanda.</p>
+        <p>Software developer · Rwanda</p>
 
         <p>© {new Date().getFullYear()} All Rights Reserved.</p>
       </footer>
