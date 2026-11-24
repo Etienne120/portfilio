@@ -24,6 +24,24 @@ import {
   MessageCircle,
   GraduationCap,
 } from "lucide-react";
+import {
+  siCss,
+  siFigma,
+  siGit,
+  siGithub,
+  siHtml5,
+  siJavascript,
+  siLaravel,
+  siMongodb,
+  siMysql,
+  siNodedotjs,
+  siPhp,
+  siPostman,
+  siReact,
+  siTailwindcss,
+  siTypescript,
+  siVuedotjs,
+} from "simple-icons";
 import "./App.css";
 
 const githubUrl = "https://github.com/Etienne120/Etienne";
@@ -76,16 +94,22 @@ const projectCategories = [
 ];
 
 const skills = [
-  "React.js",
-  "JavaScript",
-  "TypeScript",
-  "HTML5",
-  "CSS3",
-  "Tailwind CSS",
-  "Node.js",
-  "Git & GitHub",
-  "Figma",
-  "REST APIs",
+  { name: "React.js", logo: siReact },
+  { name: "Vue.js", logo: siVuedotjs },
+  { name: "JavaScript", logo: siJavascript },
+  { name: "TypeScript", logo: siTypescript },
+  { name: "HTML5", logo: siHtml5 },
+  { name: "CSS3", logo: siCss },
+  { name: "Tailwind CSS", logo: siTailwindcss },
+  { name: "Node.js", logo: siNodedotjs },
+  { name: "PHP", logo: siPhp },
+  { name: "Laravel", logo: siLaravel },
+  { name: "REST APIs", logo: siPostman },
+  { name: "NoSQL", icon: <Database size={24} /> },
+  { name: "MongoDB", logo: siMongodb },
+  { name: "MySQL", logo: siMysql },
+  { name: "Git & GitHub", logos: [siGit, siGithub] },
+  { name: "Figma", logo: siFigma },
 ];
 
 const services = [
@@ -123,6 +147,8 @@ function App() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [projectCategory, setProjectCategory] = useState("All");
   const [messageStatus, setMessageStatus] = useState("");
+  const [messageError, setMessageError] = useState(false);
+  const [isSending, setIsSending] = useState(false);
   const [focusIndex, setFocusIndex] = useState(0);
   const shouldReduceMotion = useReducedMotion();
   const { scrollYProgress } = useScroll();
@@ -156,28 +182,67 @@ function App() {
     return () => window.clearInterval(intervalId);
   }, [shouldReduceMotion]);
 
-  const handleMessageSubmit = (event) => {
+  const handleMessageSubmit = async (event) => {
     event.preventDefault();
+    if (isSending) return;
 
+    const form = event.currentTarget;
     const formData = new FormData(event.currentTarget);
     const name = formData.get("name");
     const senderEmail = formData.get("email");
     const message = formData.get("message");
-    const body = `Name: ${name}\nEmail: ${senderEmail}\n\n${message}`;
-    const channel = event.nativeEvent.submitter.value;
+    const channel = event.nativeEvent.submitter?.value;
+
+    setMessageStatus("");
+    setMessageError(false);
 
     if (channel === "whatsapp") {
       setMessageStatus(
         "WhatsApp is opening with your message. Review and send it there."
       );
-      window.open(`${whatsappUrl}?text=${encodeURIComponent(body)}`, "_blank", "noopener,noreferrer");
+      const body = `Name: ${name}\nEmail: ${senderEmail}\n\n${message}`;
+      window.open(
+        `${whatsappUrl}?text=${encodeURIComponent(body)}`,
+        "_blank",
+        "noopener,noreferrer"
+      );
       return;
     }
 
-    setMessageStatus(
-      `Your email app should open with a draft addressed to ${emailAddress}. Review and send it there; this website cannot confirm delivery.`
-    );
-    window.location.href = `mailto:${emailAddress}?subject=${encodeURIComponent(`Portfolio message from ${name}`)}&body=${encodeURIComponent(body)}`;
+    setIsSending(true);
+    setMessageStatus("Sending your message...");
+
+    try {
+      const response = await fetch(
+        `https://formsubmit.co/ajax/${encodeURIComponent(emailAddress)}`,
+        {
+          method: "POST",
+          headers: { Accept: "application/json" },
+          body: new URLSearchParams({
+            name: String(name),
+            email: String(senderEmail),
+            _replyto: String(senderEmail),
+            _subject: `Portfolio message from ${name}`,
+            message: String(message),
+          }),
+        }
+      );
+      const result = await response.json();
+
+      if (!response.ok || (result.success !== true && result.success !== "true")) {
+        throw new Error("The email service did not accept the message.");
+      }
+
+      setMessageStatus("Your message was sent successfully. Thank you!");
+      form.reset();
+    } catch {
+      setMessageError(true);
+      setMessageStatus(
+        "Your message could not be sent. If this is your first submission, check your inbox for FormSubmit's activation email, then try again."
+      );
+    } finally {
+      setIsSending(false);
+    }
   };
 
   return (
@@ -432,16 +497,42 @@ function App() {
             {skills.map((skill, index) => (
               <motion.div
                 className="skill-card"
-                key={skill}
+                key={skill.name}
                 initial={shouldReduceMotion ? false : { opacity: 0, y: 16 }}
                 whileInView={shouldReduceMotion ? undefined : { opacity: 1, y: 0 }}
                 viewport={{ once: true, amount: 0.4 }}
                 whileHover={shouldReduceMotion ? undefined : { y: -4 }}
                 transition={{ duration: 0.35, delay: shouldReduceMotion ? 0 : index * 0.035 }}
               >
-                <span>{String(index + 1).padStart(2, "0")}</span>
-                <h3>{skill}</h3>
-                <ArrowUpRight size={18} />
+                <div className="skill-card-top">
+                  <span>{String(index + 1).padStart(2, "0")}</span>
+                  {skill.logo && (
+                    <svg
+                      className="skill-logo"
+                      viewBox="0 0 24 24"
+                      aria-hidden="true"
+                      style={{ color: `#${skill.logo.hex}` }}
+                    >
+                      <path d={skill.logo.path} />
+                    </svg>
+                  )}
+                  {skill.logos && (
+                    <div className="skill-logo-pair" aria-hidden="true">
+                      {skill.logos.map((logo) => (
+                        <svg
+                          className="skill-logo"
+                          key={logo.title}
+                          viewBox="0 0 24 24"
+                          style={{ color: `#${logo.hex}` }}
+                        >
+                          <path d={logo.path} />
+                        </svg>
+                      ))}
+                    </div>
+                  )}
+                  {skill.icon}
+                </div>
+                <h3>{skill.name}</h3>
               </motion.div>
             ))}
           </div>
@@ -617,16 +708,40 @@ function App() {
                 </label>
 
                 <div className="message-form-actions">
-                  <button className="primary-button" type="submit" name="channel" value="email">
-                    Send Email <Mail size={17} />
+                  <button
+                    className="primary-button"
+                    type="submit"
+                    name="channel"
+                    value="email"
+                    disabled={isSending}
+                  >
+                    {isSending ? "Sending..." : "Send Email"} <Mail size={17} />
                   </button>
-                  <button className="secondary-button" type="submit" name="channel" value="whatsapp">
+                  <button
+                    className="secondary-button"
+                    type="submit"
+                    name="channel"
+                    value="whatsapp"
+                    disabled={isSending}
+                  >
                     Send WhatsApp <MessageCircle size={17} />
                   </button>
                 </div>
                 {messageStatus && (
-                  <p className="form-feedback" role="status" aria-live="polite">
+                  <p
+                    className={`form-feedback${messageError ? " error" : ""}`}
+                    role="status"
+                    aria-live="polite"
+                  >
                     {messageStatus}
+                    {messageError && (
+                      <>
+                        {" "}
+                        <a href={`mailto:${emailAddress}`}>
+                          Email me directly.
+                        </a>
+                      </>
+                    )}
                   </p>
                 )}
               </form>
